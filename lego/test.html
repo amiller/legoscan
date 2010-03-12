@@ -1,0 +1,188 @@
+<head>
+<title>Lego Tasks</title>
+
+<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+
+<script type="text/javascript" src="pyreg_/web-socket-js/swfobject.js"></script>
+<script type="text/javascript" src="pyreg_/web-socket-js/FABridge.js"></script>
+<script type="text/javascript" src="pyreg_/web-socket-js/web_socket.js"></script>
+
+<link type="text/css" href="http://jqueryui.com/latest/themes/base/jquery.ui.all.css" rel="stylesheet" />
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="http://jquery-ui.googlecode.com/svn/tags/1.8rc1/ui/jquery-ui.js"></script>
+<script type="text/javascript" src="pyreg_/jquery.query.js"></script>
+<script type="text/javascript" src="pyreg_/json2.min.js"></script>
+<script type="text/javascript" src="pyreg_/pyreg.js"></script>
+
+
+<script>
+WebSocket.__swfLocation = "pyreg_/web-socket-js/WebSocketMain.swf"
+python = Python(21000)	
+</script>
+
+<style type="text/css">
+</style>
+
+</head>
+
+<div style="float:right">
+	<div id="error"><pre id="error"></pre></div>
+	<span id="ping" style="background-color:lightgreen"></span>
+	<input type="button" id="ping" value="Ping"/>
+</div>
+
+<h1>Lego Task Editor</h1>
+
+<script>
+$(function() {
+	$('input#ping').click(function() {
+		$('span#ping').html('')
+		python.eval('"ping"', function (data) {
+			if (data == 'ping') $('span#ping').html('OK')
+		})
+	})
+	$('input#ping').trigger('click')
+})
+</script>
+
+
+<p>A lego task is a sequence of build steps. Input pieces are used to create a single final object. Each build step has a section of video going along with it.</p>
+
+<script>
+function refresh_tasks() {
+	python.eval("shell('ls data/tasks')", function (result) {
+		$('select#task').html();
+		$.each(result, function (k,v) {
+			$('select#task').append('<option value="'+v+'">'+v+'</option>')
+		})
+	})	
+}
+$(function() {
+	refresh_tasks()
+	$('select#task').change(function () {
+		python.eval('choose_task("'+ $('select#task').val() +'")')
+	})
+})
+</script>
+
+<div>List of tasks <select id='task'></select>
+	<input type="button" value="Reload" onClick="$('select#task').trigger('change')"/>
+	<span id="taskname"></span></div>
+
+<script>
+var framelist = []
+var curframe = 0
+var task;
+var cliptimeout;
+var clip;
+
+function play_clip(k) {
+	clip = task.steps[k].clip
+	$('div#frameslider').slider('value', clip.start)
+	clearInterval(cliptimeout)
+	cliptimeout = setInterval(play_nextframe, 10)
+}
+function play_nextframe() {
+	frame = $('div#frameslider').slider('value')
+	if (frame >= clip.end)
+		clearInterval(cliptimeout)
+	else
+		$('div#frameslider').slider('value', frame+1);
+}
+
+function refresh_task() {
+	python.eval('task', function (t) {
+		$('select#task').val(t)
+	})
+	python.eval('config', function (data) {
+		task = data
+		$('span#taskname').html(task.name)
+		$('ol#steps').html('')
+		$.each(task.steps, function (k, v) {
+			$('ol#steps').append('<li><input type="button" onClick="play_clip('+k+')" value="Play"/>' + JSON.stringify(v.clip))
+		})
+
+	})
+	python.eval('get_frame_list()', function (data) {
+		framelist = data
+		$('div#frameslider').slider({
+			max: framelist.length
+		})
+		$('div#frameslider').slider('value',0)
+	})
+}
+$(function() {
+	refresh_task()
+		
+	$('div#frameslider').slider({
+		min:0,
+		orientation:'horizontal',
+		change:function(event, ui) {
+			value = $('div#frameslider').slider('value')
+			curframe = value
+			$('img#curframe').attr('src', framelist[curframe])
+			$('div#frametext').html('Frame: ' + curframe)
+		}
+	})
+})
+
+</script>
+
+<div>
+	
+<div style="float:right;margin-right:5px">
+	<div id="frameslider"></div><img width="200" id="curframe" src=""/>
+	<div id="frametext"></div>
+</div>
+<h2>1. Video Sequence</h2>
+Stuff about video sequence
+<ol id="steps">
+</ol>
+
+<div style="clear:both"></div>
+</div>
+
+<script>
+$(function() {
+
+})
+</script>
+
+
+<div>
+<div style="float:right">
+<img height="180" id="camera"/>
+<div><input type="button" value="Stop"><input type="button" value="Play"></div>
+</div>
+<h2>2. Cameras</h2>
+
+<div>Select camera <select></select></div>
+<div>Exposure 
+
+<span>
+<div style="width:200px;">
+	<div id="exposureslider"></div>
+</div>
+</span>
+</div>
+
+<div style="clear:both"></div>
+</div>
+
+<script>
+// List the cameras, display them in the select option
+// Pick a camera
+
+$(function () {
+	$('div#exposureslider').slider({
+		width:200,
+		min:0,
+		max:450,
+		orientation:'horizontal',
+		change:function(event, ui) {
+			value = $('div#exposureslider').slider('value')
+			python.eval('set_exposure(' + (1.0 - value / 1000.0) + ')')
+		}
+	})
+})
+</script>
