@@ -8,7 +8,7 @@
 <script type="text/javascript" src="pyreg_/web-socket-js/web_socket.js"></script>
 
 <link type="text/css" href="http://jqueryui.com/latest/themes/base/jquery.ui.all.css" rel="stylesheet" />
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.pack.js"></script>
 <script type="text/javascript" src="http://jquery-ui.googlecode.com/svn/tags/1.8rc1/ui/jquery-ui.js"></script>
 <script type="text/javascript" src="pyreg_/jquery.query.js"></script>
 <script type="text/javascript" src="pyreg_/json2.min.js"></script>
@@ -60,7 +60,7 @@ function refresh_tasks() {
 $(function() {
 	refresh_tasks()
 	$('select#task').change(function () {
-		python.eval('choose_task("'+ $('select#task').val() +'")')
+		python.exec('choose_task("'+ $('select#task').val() +'"); stop()')
 	})
 })
 </script>
@@ -91,10 +91,10 @@ function play_nextframe() {
 }
 
 function refresh_task() {
-	python.eval('task', function (t) {
+	python.eval('taskname', function (t) {
 		$('select#task').val(t)
 	})
-	python.eval('config', function (data) {
+	python.eval('taskconfig', function (data) {
 		task = data
 		$('span#taskname').html(task.name)
 		$('ol#steps').html('')
@@ -138,11 +138,23 @@ $(function() {
 Stuff about video sequence
 <ol id="steps">
 </ol>
-
 <div style="clear:both"></div>
 </div>
 
+<h2>2. Projector Control</h2>
+<div><input type="button" value="Play" onClick="play()"/>
+<input type="button" value="Draw1" onClick="python.exec('draw1 = not draw1')"/>
+<input type="button" value="Draw2" onClick="python.exec('draw2 = not draw2')"/></div>
+
+<div><input type="button" value="Advance" 
+	onClick="python.exec('spotlight.advance()')"/>
+	<input type="button" value="Draw Spotlight" 
+	onClick="python.exec('drawspotlight = not drawspotlight')"/>
+
 <script>
+function play() {
+	python.eval('play()')
+}
 $(function() {
 
 })
@@ -152,9 +164,8 @@ $(function() {
 <div>
 <div style="float:right">
 <img height="180" id="camera"/>
-<div><input type="button" value="Stop"><input type="button" value="Play"></div>
 </div>
-<h2>2. Cameras</h2>
+<h2>3. Cameras</h2>
 
 <div>Select camera <select></select></div>
 <div>Exposure 

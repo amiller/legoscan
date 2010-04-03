@@ -4,7 +4,7 @@ from uvcobjc import UVCCameraControl
 from camera import camcap
 
 
-usbid = 0x26200000
+#usbid = 0x26200000
 #control = UVCCameraControl.alloc().initWithLocationID_(usbid)
 control = UVCCameraControl.alloc().initWithVendorID_productID_(0x04f2, 0xa13c)
 control.setAutoExposure_(0)

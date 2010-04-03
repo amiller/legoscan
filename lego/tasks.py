@@ -2,22 +2,28 @@ import subprocess
 import simplejson as json
 from helpful import *
 import pyreg
+import bunch
+import spotlight
 
-task = None
+taskname = None
 taskpath = None
+taskconfig = None
 
 def read_config():
-	global config
+	global taskconfig
 	with open('%s/task.js' % (taskpath,), 'r') as f:
-		config = json.load(f)
+		taskconfig = bunch.bunchify(json.load(f))
 
-def choose_task(task_):
-	global task, taskpath
-	task = task_
-	taskpath = "data/tasks/%s" % (task,)
+def choose_task(taskname_):
+	global taskname, taskpath
+	taskname = taskname_
+	taskpath = "data/tasks/%s" % (taskname,)
 	print 'switched: ', taskpath
 	read_config()
 	pyreg.push('refresh_task()')
+	global framelist
+	framelist = get_frame_list()
+	spotlight.loadtask(taskconfig)
 
 	
 def get_frame_list():

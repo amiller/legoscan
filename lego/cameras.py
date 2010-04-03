@@ -6,6 +6,8 @@ from helpful import *
 
 from uvcobjc import UVCCameraControl
 
+#control = UVCCameraControl.alloc().initWithVendorID_productID_(0x04f2, 0xa13c)
+
 cameras = []
 controllers = []
 
