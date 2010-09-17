@@ -60,7 +60,7 @@ function refresh_tasks() {
 $(function() {
 	refresh_tasks()
 	$('select#task').change(function () {
-		python.exec('choose_task("'+ $('select#task').val() +'"); stop()')
+		python.exec('tasks.choose_task("'+ $('select#task').val() +'"); video.stop()')
 	})
 })
 </script>
@@ -91,10 +91,10 @@ function play_nextframe() {
 }
 
 function refresh_task() {
-	python.eval('taskname', function (t) {
+	python.eval('tasks.taskname', function (t) {
 		$('select#task').val(t)
 	})
-	python.eval('taskconfig', function (data) {
+	python.eval('tasks.taskconfig', function (data) {
 		task = data
 		$('span#taskname').html(task.name)
 		$('ol#steps').html('')
@@ -103,7 +103,7 @@ function refresh_task() {
 		})
 
 	})
-	python.eval('get_frame_list()', function (data) {
+	python.eval('tasks.get_frame_list()', function (data) {
 		framelist = data
 		$('div#frameslider').slider({
 			max: framelist.length
@@ -149,16 +149,73 @@ Stuff about video sequence
 <div><input type="button" value="Advance" 
 	onClick="python.exec('spotlight.advance()')"/>
 	<input type="button" value="Draw Spotlight" 
-	onClick="python.exec('drawspotlight = not drawspotlight')"/>
-
+	onClick="python.exec('spotlight.drawspotlight = not spotlight.drawspotlight')"/>
+</div>
 <script>
 function play() {
-	python.eval('play()')
+	python.eval('video.play()')
 }
 $(function() {
 
 })
 </script>
+
+<div>
+	<div style="float:left">Radius: </div>
+	<div style="float:left;width:200px;margin:5px">
+		<div id="widthslider"></div>
+	</div>
+	<div style="clear:both"></div>
+</div>
+<div>
+	<div style="float:left">Frequency: </div>
+	<div style="float:left;width:200px;margin:5px">
+		<div id="speedslider"></div>
+	</div>
+	<div style="clear:both"></div>
+</div>
+<div>
+	<div style="float:left">Number: </div>
+	<div style="float:left;width:200px;margin:5px">
+		<div id="countslider"></div>
+	</div>
+	<div style="clear:both"></div>
+</div>
+
+
+<script>
+$(function() {
+	$('div#widthslider').slider({
+		min:0,
+		max:10,
+		orientation:'horizontal',
+		change:function(event, ui) {
+			value = $('div#widthslider').slider('value')
+			python.exec('spotlight.lineradius = ' + value)
+		}
+	})
+	$('div#speedslider').slider({
+		min:0,
+		max:20,
+		orientation:'horizontal',
+		change:function(event, ui) {
+			value = $('div#speedslider').slider('value') / 4.0
+			python.exec('spotlight.linefreq = ' + value)
+		}
+	})
+	$('div#countslider').slider({
+		min:0,
+		max:7,
+		orientation:'horizontal',
+		change:function(event, ui) {
+			value = $('div#countslider').slider('value')
+			python.exec('spotlight.linecount = ' + value)
+		}
+	})
+})
+</script>
+
+
 
 
 <div>

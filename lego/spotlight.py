@@ -1,6 +1,7 @@
 from lego import *
 import numpy as np
 from OpenGL.GL import *
+import tasks
 
 # Read the drawing field and dimensions from the config
 # Prepare homographies, build into opengl
@@ -12,18 +13,20 @@ from OpenGL.GL import *
 # - Spotlight the location where it goes
 # - Animate some motion in between (optional?)
 
-
+drawspotlight = True
+drawcircles = True
 layer = 0
 piece = 0
 homography = []
-taskconfig = {}
 drawpieces = []
 spotpieces = []
 remainingpieces = []
+counter = 0.0
+linefreq = 1	# Line every 2 seconds
+linecount = 4
+lineradius = 3
 
-def loadtask(taskconfig_):
-	global taskconfig
-	taskconfig = taskconfig_
+def loadtask(taskconfig):
 	reset()
 	
 def loadconfig(config): 
@@ -42,7 +45,7 @@ def advance():
 		layer = 1
 		piece = 0
 		# Find the next piece that's off the first layer
-		remainingpieces = [x for x in taskconfig.model if x.location[2] > 0]
+		remainingpieces = [x for x in tasks.taskconfig.model if x.location[2] > 0]
 		spotpieces = [remainingpieces[0]]
 		drawpieces = []
 	else:
@@ -58,11 +61,43 @@ def reset():
 	global layer, piece, drawpieces, spotpieces, remainingpieces
 	layer = 0
 	piece = 0
-	drawpieces = [x for x in taskconfig.model if x.location[2] == 0]
+	drawpieces = [x for x in tasks.taskconfig.model if x.location[2] == 0]
 	spotpieces = []
 	remainingpieces = []
 	
+def update(dt):
+	global counter
+	counter += dt * linefreq
+	counter -= np.floor(counter)
+	
+	
+def draw_beatcircles(piece):
+	glPushMatrix()
+	glColor(*[1,1,1])
+	glTranslate(piece.location[0],piece.location[1],0)
+	glTranslate(piece.shape[0]/2,piece.shape[1]/2,0)
+	def draw_rectangle(scale):
+		glPushMatrix()
+		glScale(scale,scale,1)
+		sx, sy = piece.shape
+		glLineWidth(2)
+		glBegin(GL_LINE_STRIP)
+		glVertex(-sx/2,-sy/2)
+		glVertex(-sx/2, sy/2)
+		glVertex( sx/2, sy/2)
+		glVertex( sx/2,-sy/2)
+		glVertex(-sx/2,-sy/2)
+		glEnd()
+		glPopMatrix()
+	for i in range(linecount):
+		d = (1.0-counter + float(i)) / linecount
+		glColor(1,1,1,1-d)
+		draw_rectangle (d*lineradius + 1)
+	glPopMatrix()
+	
 def draw():
+	if not drawspotlight: return
+	
 	# Deal with the homography
 	glMatrixMode(GL_MODELVIEW)
 	glPushMatrix()
@@ -86,6 +121,9 @@ def draw():
 		glVertex(piece.shape[0],0)
 		glEnd()
 		glPopMatrix()
+		
+	glEnable(GL_BLEND)
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
 	
 	# Draw the spotlight
 	for piece in spotpieces:
@@ -100,6 +138,9 @@ def draw():
 		glEnd()
 		glPopMatrix()
 		
+		if drawcircles:
+			draw_beatcircles(piece)
+		
 		# Draw to the side
 		glPushMatrix()
 		glTranslate(piece.location[0]-12,piece.location[1],0)
@@ -113,4 +154,4 @@ def draw():
 		glPopMatrix()
 	glPopMatrix()
 	
-	# Draw the 
+	

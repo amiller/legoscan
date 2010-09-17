@@ -1,7 +1,7 @@
 import subprocess
 import simplejson as json
-from helpful import *
-import pyreg
+from pyreg.helpful import shell # Quick use of the subprocess module
+from pyreg import browser
 import bunch
 import spotlight
 
@@ -20,7 +20,7 @@ def choose_task(taskname_):
 	taskpath = "data/tasks/%s" % (taskname,)
 	print 'switched: ', taskpath
 	read_config()
-	pyreg.push('refresh_task()')
+	browser.push('refresh_task()')
 	global framelist
 	framelist = get_frame_list()
 	spotlight.loadtask(taskconfig)
@@ -33,4 +33,3 @@ def get_frame_list():
 def main():
 	choose_task('blackship')
 	
-main()
