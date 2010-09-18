@@ -7,6 +7,24 @@ Required libraries:
 	pyopengl
 	pylab
 	bunch
+	PIL
 	simplejson
 	
 	also pyreg
+	
+	
+---------
+How to run:
+
+	From the lego directory, 
+		python -m pyreg.server modelviewer.py
+	
+	Click and drag to rotate
+		
+	To pick a different lego
+		tasks.choose_task('redbracket')  # or 'blackship', 'yellow3' ... anything in data/tasks
+		
+	To take a depth cam snapshot:
+		snapshot(); imshow(depthim)
+		
+		
