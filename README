@@ -1,0 +1,12 @@
+LegoScan
+
+Lego Viewer and depth image generator
+------
+Required libraries:
+	pyglet
+	pyopengl
+	pylab
+	bunch
+	simplejson
+	
+	also pyreg
