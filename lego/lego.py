@@ -25,47 +25,48 @@ def make_homography(src, dst):
 
 
 def draw_pieces(pieces):
+	
+	# Draw cube
+	vertices = [[0, 0, 1], [1, 0, 1],	[0, 1, 1],	[1, 1, 1],
+							[0, 0, 0], [1, 0, 0],	[0, 1, 0],	[1, 1, 0]];
+							
+	# Indices for triangle strip around the cube
+	indices = [0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1]
+	
+	# Circles for the little nubs
+	h = np.arange(0,2*np.pi+0.1,0.5)
+	h = np.hstack((h, [0]))
+	cp = np.hstack((np.vstack((np.cos(h), np.sin(h), h*0)),
+								  np.vstack((np.cos(h), np.sin(h), h*0+1))))
 
+	cp = cp.transpose()
+	
+	radius = 0.32
+	# outside indices
+	oindices = np.vstack((range(len(h)), len(h)+np.arange(len(h))))
+	oindices = oindices.transpose().flatten()
+	# circle indices
+	cindices = range(len(h), len(h)+len(h))
+
+	glEnableClientState(GL_VERTEX_ARRAY)
+	#glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+	
+	glVertexPointers(vertices);
 	for piece in pieces:
 		glPushMatrix()
 		glScale(.05, .05, .07);
 		glTranslate(piece.location[0],piece.location[1],piece.location[2])
 		glColor(*piece.color)
-		glEnableClientState(GL_VERTEX_ARRAY)
-		#glEnableClientState(GL_TEXTURE_COORD_ARRAY)
-		global cp, indices
-		
-		# Draw cube
-		vertices = [[0, 0, 1], [1, 0, 1],	[0, 1, 1],	[1, 1, 1],
-								[0, 0, 0], [1, 0, 0],	[0, 1, 0],	[1, 1, 0]];
-								
-		# Indices for triangle strip around the cube
-		glVertexPointers(vertices);
-		indices = [0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1]
-		
-		glPushMatrix()
+
 		glScale(piece.shape[0], piece.shape[1], 1)
 		glDrawElementsui(GL_TRIANGLE_STRIP, indices)
 		glPopMatrix()
-		
-		# Circles for the little nubs
-		h = np.arange(0,2*np.pi+0.1,0.5)
-		h = np.hstack((h, [0]))
-		cp = np.hstack((np.vstack((np.cos(h), np.sin(h), h*0)),
-									  np.vstack((np.cos(h), np.sin(h), h*0+1))))
 	
-		cp = cp.transpose()
-		glVertexPointerf(cp)
-		
-		radius = 0.32
-		# outside indices
-		indices = np.vstack((range(len(h)), len(h)+np.arange(len(h))))
-		indices = indices.transpose().flatten()
-		# circle indices
-		cindices = range(len(h), len(h)+len(h))
-		
-		glPopMatrix(); continue
-		
+	glVertexPointerf(cp)
+	for piece in pieces:
+		glPushMatrix()
+		glScale(.05, .05, .07);
+		glTranslate(piece.location[0],piece.location[1],piece.location[2])
 		glColor(np.array(piece.color)*0.8)
 		for x in range(piece.shape[0]):
 			for y in range(piece.shape[1]):
@@ -73,7 +74,7 @@ def draw_pieces(pieces):
 				glTranslate(x+0.5, y+0.5, 1)
 				glScale(radius, radius, 0.2)
 				
-				glDrawElementsui(GL_TRIANGLE_STRIP, indices)
+				glDrawElementsui(GL_TRIANGLE_STRIP, oindices)
 				glDrawElementsui(GL_TRIANGLE_FAN, cindices)
 	
 				glPopMatrix()

@@ -28,3 +28,8 @@ How to run:
 		snapshot(); imshow(depthim)
 		
 		
+	Now try this:
+		ipython
+		run -i offscreen
+		solvepose()
+		
