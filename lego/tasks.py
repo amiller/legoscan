@@ -32,4 +32,4 @@ def get_frame_list():
 	
 def main():
 	choose_task('blackship')
-	
+main()
