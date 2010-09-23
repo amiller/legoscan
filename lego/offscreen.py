@@ -1,7 +1,7 @@
 import pyglet
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from OpenGL.GL.framebufferobjects import *
+#from OpenGL.GL.framebufferobjects import *
 import lego
 import tasks
 import numpy as np
