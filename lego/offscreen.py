@@ -56,7 +56,8 @@ d1 = depthim
 # Compute the cost funtion given two depth images
 # Sum squared difference of distance
 def depthcost(im1, im2):
-	return np.sum((im1 - im2)**2)
+	mask = ((im1>1) | (im2>1))
+	return np.sum((im1 - im2)**2 * mask) / np.sum(mask)
 	
 def solvepose():
 	def err(x):
@@ -65,11 +66,14 @@ def solvepose():
 		draw(rot)
 		return depthcost(d1, depthim)
 	global xs
-	xs = scipy.optimize.fmin(err, r1)
+	global r1
+	r1 = r0 + (np.random.rand(3)*2-1)*0.6
+	xs = scipy.optimize.fmin_powell(err, r1)
+	#xs = scipy.optimize.fmin(err, r1)
 	
-def surface():
-	rangex = np.arange(-0.3,0.3,0.03)
-	rangey = np.arange(-0.3,0.3,0.03)
+def surface(r0=r0):
+	rangex = np.arange(-0.6,0.6,0.06)
+	rangey = np.arange(-0.6,0.6,0.06)
 	global x,y
 	x,y = np.meshgrid(rangex, rangey)
 	
@@ -79,7 +83,7 @@ def surface():
 		draw(rot)
 		return depthcost(d1, depthim)
 	
-	global z	
+	global z
 	z = [err(r0+np.array([xp,yp,0])) for xp in rangex for yp in rangey]
 	z = np.reshape(z, (len(rangey),len(rangex)))
 	fig = pylab.figure(1)
@@ -87,9 +91,8 @@ def surface():
 	global ax
 	ax = mp3.Axes3D(fig)
 
-	ax.plot_surface(x,y,z, rstride=1,cstride=1, cmap=pylab.cm.jet,
+	ax.plot_surface(x,y,-z, rstride=1,cstride=1, cmap=pylab.cm.jet,
 		linewidth=0,antialiased=False)
-	#ax.scatter(xs.flatten(), ys.flatten(), zs.flatten())
 	fig.show()
 	
 	
@@ -99,8 +102,6 @@ def showpointcloud():
 	ax = mp3.Axes3D(fig)
 	global x,y
 	x,y = np.meshgrid(range(depthim.shape[1]),range(depthim.shape[0]))
-	xs,ys,zs = x[::5,::5], y[::5,::5], depthim[::5,::5]
-	ax.plot_surface(xs,ys,zs, rstride=1,cstride=1, cmap=pylab.cm.jet,
+	ax.plot_surface(x,y,z, rstride=2,cstride=2, cmap=pylab.cm.jet,
 		linewidth=0,antialiased=False)
-	#ax.scatter(xs.flatten(), ys.flatten(), zs.flatten())
 	fig.show()
